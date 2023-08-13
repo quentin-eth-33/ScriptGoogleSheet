@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 30px;
+      background-color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      border-radius: 5px;
+    }
+
+    .container label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .container input[type="date"],
+    .container input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .container input[type="string"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .container button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background-color: #4CAF50;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .container button:hover {
+      background-color: #45a049;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <label for="amountInput">Montant (en $): </label>
+    <input type="number" id="amountInput" required>
+    <div class="error-message" id="amountInputError"></div>
+    <br><br>
+
+    <label for="dateInput">Date :</label>
+    <input type="date" id="dateInput" required>
+    <div class="error-message" id="dateError"></div>
+    <br><br>
+
+    <button onclick="validateForm()">Valider</button>
+  </div>
+
+  <script>
+    function validateForm() {
+        let amountInput = document.getElementById("amountInput");
+        let amountInputError = document.getElementById("amountInputError");
+
+        let dateInput = document.getElementById("dateInput");
+        let dateInputError = document.getElementById("dateError");
+        
+        let isValid = true;
+
+        if (!amountInput.value) {
+          amountInputError.textContent = "Ce champ est obligatoire";
+          isValid = false;
+        } else {
+          amountInputError.textContent = "";
+        }
+
+        if (!dateInput.value) {
+          dateError.textContent = "Ce champ est obligatoire";
+          isValid = false;
+        } else {
+          dateError.textContent = "";
+        }
+
+        if (isValid) {
+          google.script.run.addNewCashIn(amountInput.value, dateInput.value);
+          google.script.host.close();
+        }
+      }
+  </script>
+</body>
+
+</html>
