@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 30px;
+      background-color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      border-radius: 5px;
+    }
+
+    .container label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .container select {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      box-sizing: border-box;
+      background-color: #f5f5f5;
+      color: #333333;
+      font-size: 16px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, #666666 50%),
+        linear-gradient(135deg, #666666 50%, transparent 50%);
+      background-position: calc(100% - 20px) calc(1em + 2px), calc(100% - 15px) calc(1em + 2px);
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+
+    .container .radio-group {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .container input[type="date"],
+    .container input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .container input[type="radio"] {
+      margin: 0;
+    }
+
+    .container button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background-color: #4CAF50;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .container button:hover {
+      background-color: #45a049;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <label for="amountInput">Montant de la transaction (en $):</label>
+    <input type="number" id="amountInput" required>
+    <div class="error-message" id="amountError"></div>
+    <br><br>
+
+    <label for="optionSelect">Sélectionnez la crypto achetée: </label>
+    <div class="select-container">
+      <select id="optionSelectBuy" required>
+          <option value=""></option>
+        </select>
+      <div class="error-message" id="optionErrorBuy"></div>
+    </div>
+    <br><br>
+
+    <label for="quantityInput">Quantité Achetée:</label>
+    <input type="number" id="quantityInputBuy" required>
+    <div class="error-message" id="quantityErrorBuy"></div>
+    <br><br>
+
+    <label for="optionSelect">Sélectionnez la crypto vendu: </label>
+    <div class="select-container">
+      <select id="optionSelectSell" required>
+          <option value=""></option>
+        </select>
+      <div class="error-message" id="optionErrorSell"></div>
+    </div>
+    <br><br>
+
+    <label for="quantityInput">Quantité Vendu:</label>
+    <input type="number" id="quantityInputSell" required>
+    <div class="error-message" id="quantityErrorSell"></div>
+    <br><br>
+
+    <label for="dateInput">Date :</label>
+    <input type="date" id="dateInput" required>
+    <div class="error-message" id="dateError"></div>
+    <br><br>
+    <button onclick="validateForm()">Valider</button>
+  </div>
+
+  <script>
+    function validateForm() {
+        let optionSelectBuy = document.getElementById("optionSelectBuy");
+        let optionErrorBuy = document.getElementById("optionErrorBuy");
+
+        let optionSelectSell = document.getElementById("optionSelectSell");
+        let optionErrorSell = document.getElementById("optionErrorSell");
+
+        let dateInput = document.getElementById("dateInput");
+        let dateError = document.getElementById("dateError");
+
+        let amountInput = document.getElementById("amountInput");
+        let amountError = document.getElementById("amountError");
+
+        let quantityInputBuy = document.getElementById("quantityInputBuy");
+        let quantityErrorBuy = document.getElementById("quantityErrorBuy");
+
+        let quantityInputSell = document.getElementById("quantityInputSell");
+        let quantityErrorSell = document.getElementById("quantityErrorSell");
+        
+        let isValid = true;
+
+        if (!optionSelectBuy.value) {
+          optionErrorBuy.textContent = "Ce champ est obligatoire";
+          isValid = false;
+        } else {
+          optionErrorBuy.textContent = "";
+        }
+
+        if (!optionSelectSell.value) {
+          optionErrorSell.textContent = "Ce champ est obligatoire";
+          isValid = false;
+        } else {
+          optionErrorSell.textContent = "";
+        }
+
+        if (!dateInput.value) {
+          dateError.textContent = "Ce champ est obligatoire";
+          isValid = false;
+        } else {
+          dateError.textContent = "";
+        }
+
+        if (!amountInput.value) {
+          amountError.textContent = "Ce champ est obligatoire";
+          isValid = false;
+        } else {
+          amountError.textContent = "";
+        }
+
+        if (!quantityInputBuy.value) {
+          quantityErrorBuy.textContent = "Ce champ est obligatoire";
+          isValid = false;
+        } else {
+          quantityErrorBuy.textContent = "";
+        }
+
+        if (!quantityInputSell.value) {
+          quantityErrorSell.textContent = "Ce champ est obligatoire";
+          isValid = false;
+        } else {
+          quantityErrorSell.textContent = "";
+        }
+
+        if (isValid) {
+          let selectedOptionBuy = optionSelectBuy.value;
+          let selectedOptionSell = optionSelectSell.value;
+
+          let selectedDate = dateInput.value;
+          let selectedAmount = amountInput.value;
+          let selectedQuantityBuy = quantityInputBuy.value;
+          let selectedQuantitySell = quantityInputSell.value;
+          let buy = true;
+          let sell = false;
+          
+          google.script.run.addNewTransaction(selectedAmount, selectedOptionBuy, selectedQuantityBuy, selectedDate, buy);
+          google.script.run.addNewTransaction(selectedAmount, selectedOptionSell, selectedQuantitySell, selectedDate, sell);
+          google.script.run.addNewChronologicalTransactionHistoric(selectedAmount, selectedOptionBuy, selectedQuantityBuy, selectedOptionSell, selectedQuantitySell, selectedDate, sell);
+
+          google.script.host.close();
+        }
+      }
+
+      window.onload = function() {
+        let selectBuy = document.getElementById("optionSelectBuy");
+        let selectSell = document.getElementById("optionSelectSell");
+
+        for (let i = 0; i < choices.length; i++) {
+          let optionBuy = document.createElement("option");
+          let optionSell = document.createElement("option");
+          optionBuy.value = choices[i];
+          optionBuy.text = choices[i];
+          selectBuy.appendChild(optionBuy);
+
+          optionSell.value = choices[i];
+          optionSell.text = choices[i];
+          selectSell.appendChild(optionSell);
+        }
+      };
+  </script>
+</body>
+
+</html>
