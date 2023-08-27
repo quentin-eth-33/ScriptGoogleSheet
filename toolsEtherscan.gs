@@ -1,64 +1,7 @@
-const apiScanInfos = {
-  etherscan: {
-    methods:{
-      swapExactETHForTokens: {
-          methodId: "0x7ff36ab5",
-          logIndexCryptoBuy: 2,
-          logIndexQuantityBuy: 2,
-          crytoSell: "Ethereum",
-          logIndexQuantitySell: 0,
-      },
-      swapExactTokensForETH: {
-        methodId: "0x18cbafe5",
-        cryptoBuy: "Ethereum",
-        logIndexQuantityBuy: 1,
-        logIndexCryptoSell: 0,
-        logIndexQuantitySell: 0,
-      },
-      unibotBuyV2: {
-        methodId: "0x19948479",
-        logIndexCryptoBuy: 2,
-        logIndexQuantityBuy: 3,
-        crytoSell: "Ethereum",
-        logIndexQuantitySell: 0,
-      },
-      unibotSellV2: {
-        methodId: "0x8ee938a9",
-        cryptoBuy: "Ethereum",
-        logIndexQuantityBuy: 2,
-        logIndexCryptoSell: 0,
-        logIndexQuantitySell: [0, 1]
-      },
-      unibotSellV3: {
-      methodId: "0x8107aee3",
-      cryptoBuy: "Ethereum",
-      logIndexQuantityBuy: 2,
-      logIndexCryptoSell: 0,
-      logIndexQuantitySell: [0, 1]
-      }
-    },
-    nameDomain: "etherscan.io",
-    apiKey: "5DDYRKH9WW2CASRHPBR2RZ29467S31V18D"
-  }
-}
-/*
-const apiScanInfos = {
-  bscscan: {
-    methodId: [
-      { methodIdSwapExactETHForTokens: "0x7ff36ab5" },
-      { methodIdMulticallBuy: "0x5ae401dc" },
-      { methodIdSwapExactTokensForETH: "0x18cbafe5" },
-      { methodIdSwapExactTokensForTokens: "0x38ed1739" },
-      { methodIdSwapExactETHForTokensSupportingFeeOnTransferTokens: "0xb6f9de95" },
-      { methodIdSwapExactTokensForTokensSupportingFeeOnTransferTokens: "0x5c11d795" }],
-    nameDomain: "bscscan.com",
-    apiKey: "T1ZB5E35GYX7GD9M72RT2CKNWPJ6574GND"
-  }
-}*/
 function addTransactionsEtherscan() {
   let sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   let apiKeyEtherscan = "5DDYRKH9WW2CASRHPBR2RZ29467S31V18D"
-  let addressses = ["0x897cbe1b142eA9b34A82A7302c84AD19F73A1C70"/*, "0x914d449A0d989F2CCF52975ced45F925828c8030"*/]
+  let addressses = ["0x914d449A0d989F2CCF52975ced45F925828c8030"/*, "0x897cbe1b142eA9b34A82A7302c84AD19F73A1C70"*/]
   let listSellTransactions;
   let listBuyTransactions;
   const cryptoNameInGS = getAllCryptoNameInGS();
@@ -67,54 +10,23 @@ function addTransactionsEtherscan() {
     listSellTransactions = [];
     listBuyTransactions = [];
 
-    let allTransaction = fetchDataFromEtherscan(address, "etherscan.io");
-    if (allTransaction) {
-      if (allTransaction.listBuyTransactions.length == 0 && allTransaction.listSellTransactions.length == 0) {
-        console.log("|main| listBuyTransactions.length == 0 && listSellTransactions.length == 0");
-        return null
+    let listTransactionsToAdd = fetchDataFromEtherscan(address, "etherscan.io");
+    if (listTransactionsToAdd) {
+      console.log("allTransaction.length: " + listTransactionsToAdd.length);
+      for (transactionToAdd of listTransactionsToAdd) {
+        console.log("|main| Ajout de la transaction: " + transactionToAdd.hash + " , dans la feuille google sheet");
+        if (!(cryptoNameInGS.includes(transactionToAdd.cryptoBuy))) {
+          console.log("|main| Ajout de: " + transactionToAdd.cryptoBuy + " à la feuille google sheet")
+          //addNewCrypto(transactionToAdd.cryptoBuy);
+          cryptoNameInGS.push(transactionToAdd.cryptoBuy);
+        }
+        if (!(cryptoNameInGS.includes(transactionToAdd.cryptoSell))) {
+          console.log("|main| Ajout de: " + transactionToAdd.cryptoSell + " à la feuille google sheet")
+          //addNewCrypto(transactionToAdd.cryptoSell);
+          cryptoNameInGS.push(transactionToAdd.cryptoSell);
+        }
+        //transaction(transactionToAdd.amountTransaction, transactionToAdd.cryptoBuy, transactionToAdd.quantityBuy, transactionToAdd.cryptoSell, transactionToAdd.quantitySell, transactionToAdd.date)
       }
-      if (allTransaction.listBuyTransactions) {
-        listBuyTransactions = allTransaction.listBuyTransactions;
-      }
-      if (allTransaction.listSellTransactions) {
-        listSellTransactions = allTransaction.listSellTransactions;
-      }
-    } else {
-      console.log("|main| Aucune Transaction");
-      return null;
-    }
-
-    let listTransactionsToAdd = getListTransactionToAdd(listBuyTransactions, listSellTransactions);
-    let listBuyTransactionsToAdd = listTransactionsToAdd.listBuyTransactionsToAdd;
-    let listSellTransactionsToAdd = listTransactionsToAdd.listSellTransactionsToAdd;
-
-    for (buyTransactionToAdd of listBuyTransactionsToAdd) {
-      console.log("|main| Ajout de la transaction: " + buyTransactionToAdd.hash + " , dans la feuille google sheet");
-      if (!(cryptoNameInGS.includes(buyTransactionToAdd.cryptoBuy))) {
-        console.log("|main| Ajout de: " + buyTransactionToAdd.cryptoBuy + " à la feuille google sheet")
-        //addNewCrypto(buyTransactionToAdd.cryptoBuy);
-        cryptoNameInGS.push(buyTransactionToAdd.cryptoBuy);
-      }
-      if (!(cryptoNameInGS.includes(buyTransactionToAdd.cryptoSell))) {
-        console.log("|main| Ajout de: " + buyTransactionToAdd.cryptoSell + " à la feuille google sheet")
-        //addNewCrypto(buyTransactionToAdd.cryptoSell);
-        cryptoNameInGS.push(buyTransactionToAdd.cryptoSell);
-      }
-      //transaction(buyTransactionToAdd.amountTransaction, buyTransactionToAdd.cryptoBuy, buyTransactionToAdd.quantityBuy, buyTransactionToAdd.cryptoSell, buyTransactionToAdd.quantitySell, buyTransactionToAdd.date)
-    }
-    for (sellTransactionToAdd of listSellTransactionsToAdd) {
-      console.log("|main| Ajout de la transaction: " + sellTransactionToAdd.hash + " , dans la feuille google sheet");
-      if (!(cryptoNameInGS.includes(sellTransactionToAdd.cryptoBuy))) {
-        console.log("|main| Ajout de: " + sellTransactionToAdd.cryptoBuy + " à la feuille google sheet")
-        //addNewCrypto(sellTransactionToAdd.cryptoBuy);
-        cryptoNameInGS.push(sellTransactionToAdd.cryptoBuy);
-      }
-      if (!(cryptoNameInGS.includes(sellTransactionToAdd.cryptoSell))) {
-        console.log("|main| Ajout de: " + sellTransactionToAdd.cryptoSell + " à la feuille google sheet")
-        //addNewCrypto(sellTransactionToAdd.cryptoSell);
-        cryptoNameInGS.push(sellTransactionToAdd.cryptoSell);
-      }
-      //transaction(sellTransactionToAdd.amountTransaction, sellTransactionToAdd.cryptoBuy, sellTransactionToAdd.quantityBuy, sellTransactionToAdd.cryptoSell, sellTransactionToAdd.quantitySell, sellTransactionToAdd.date)
     }
   }
 }
@@ -166,54 +78,30 @@ function fetchDataFromEtherscan(address, apiUse) {
     method: "get",
     muteHttpExceptions: true
   };
-
+  const transferTopic = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
   const methodIdSwapExactETHForTokens = "0x7ff36ab5";
   const methodIdSwapExactTokensForETH = "0x18cbafe5";
   const methodIdUnibotBuyV2 = "0x19948479";
   const methodIdUnibotSellV2 = "0x8ee938a9";
   const methodIdUnibotSellV3 = "0x8107aee3";
+  const methodIdswapExactETHForTokensSupportingFeeOnTransferTokens ="0xb6f9de95";
+  const methodIdMulticall = "0x5ae401dc";
+  const methodIdSwapExactTokensForTokens = "0x38ed1739";
+  const methodIdSwapExactTokensForETHSupportingFeeOnTransferTokens = "0x791ac947";
+  const methodIdExecute = "0x3593564c"
+  
+  const listMethodIdSwap = [methodIdSwapExactETHForTokens, methodIdSwapExactTokensForETH, methodIdUnibotBuyV2, methodIdUnibotSellV2, methodIdUnibotSellV3, methodIdswapExactETHForTokensSupportingFeeOnTransferTokens, methodIdMulticall, methodIdSwapExactTokensForTokens, methodIdSwapExactTokensForETHSupportingFeeOnTransferTokens, methodIdExecute]
 
   const response = UrlFetchApp.fetch(url, options);
   const data = JSON.parse(response.getContentText());
-  const lastTimeStampTransaction = getLastTimeStampTransaction();
+  const lastTimeStampTransaction = /*getLastTimeStampTransaction()*/0;
   let listBuyTransactions = [];
   let listSellTransactions = [];
   let timestampMax = 0;
   let blockNumberMax = 0;
+  let transactionReceipt;
+  let listTransferLogs;
 
-  if (data.status === "1" && data.message === "OK") {
-
-    const transactions = data.result;
-    for (const txHash in transactions) {
-      const transaction = transactions[txHash];
-      if (transaction.timeStamp > timestampMax) {
-        timestampMax = transaction.timeStamp;
-      }
-      if (transaction.blockNumber > blockNumberMax) {
-        blockNumberMax = transaction.blockNumber;
-      }
-      if ((transaction.methodId == methodIdSwapExactETHForTokens || transaction.methodId == methodIdUnibotBuyV2) && transaction.timeStamp > lastTimeStampTransaction && transaction.txreceipt_status == 1) {
-        listBuyTransactions.push(transaction);
-      }
-      else if ((transaction.methodId == methodIdSwapExactTokensForETH || transaction.methodId == methodIdUnibotSellV2 || transaction.methodId == methodIdUnibotSellV3) && transaction.timeStamp > lastTimeStampTransaction && transaction.txreceipt_status == 1) {
-        listSellTransactions.push(transaction);
-      }
-    }
-    console.log("|fetchDataFromEtherscan| listBuyTransactions.length: " + listBuyTransactions.length);
-    console.log("|fetchDataFromEtherscan| listSellTransactions.length: " + listSellTransactions.length);
-    //setLastTimeStampTransaction(timestampMax);
-
-    return {
-      listBuyTransactions: listBuyTransactions,
-      listSellTransactions: listSellTransactions
-    }
-  } else {
-    console.log("|fetchDataFromEtherscan| API Etherscan message: " + data.message);
-    return null;
-  }
-}
-
-function getListTransactionToAdd(listBuyTransactions, listSellTransactions) {
   let amountTransaction;
   let quantitySell;
   let quantityBuy;
@@ -221,93 +109,83 @@ function getListTransactionToAdd(listBuyTransactions, listSellTransactions) {
   let cryptoBuy;
   let date;
   let logs;
-  let listBuyTransactionsToAdd = [];
-  let listSellTransactionsToAdd = [];
+  let gasFee;
+  let listTransactionsToAdd = [];
+  if (data.status === "1" && data.message === "OK") {
 
-  const ethPrice = getCurrentEthPrice();
-
-  for (buyTransaction of listBuyTransactions) {
-    let buyTransactionReceipt = getTransactionReceipt(buyTransaction.hash);
-    if (buyTransactionReceipt) {
-      logs = buyTransactionReceipt.logs;
-      if (logs) {
-        if (logs.length == 5) {
-          quantitySell = hexToDecimal(logs[0].data) / 10e17;
-          quantityBuy = hexToDecimal(logs[2].data) / 10e17;
-          amountTransaction = ethPrice * (quantitySell + (buyTransaction.gasUsed * (buyTransaction.gasPrice / 10e17)));
-          console.log("amountTransaction: "+amountTransaction+" | hash: "+buyTransaction.hash)
-          cryptoSell = "Ethereum";
-          cryptoBuy = getCryptpoName(logs[2].address);
-          date = getFormattedDate(buyTransaction.timeStamp);
-          listBuyTransactionsToAdd.push({ hash: buyTransaction.hash, amountTransaction: amountTransaction.toString(), cryptoBuy: cryptoBuy, quantityBuy: quantityBuy.toString(), cryptoSell: cryptoSell, quantitySell: quantitySell.toString(), date: date })
-          //showTransactionDetails("ACHAT 5 LOGS", logs[0].transactionHash, amountTransaction, cryptoBuy, quantityBuy, cryptoSell, quantitySell, date);
-
-        } else if (logs.length == 6) {
-          quantitySell = hexToDecimal(logs[0].data) / 10e17;
-          quantityBuy = hexToDecimal(logs[3].data) / 10e17;
-          amountTransaction = ethPrice * (quantitySell + (buyTransaction.gasUsed * (buyTransaction.gasPrice / 10e17)));
-          cryptoSell = "Ethereum";
-          cryptoBuy = getCryptpoName(logs[2].address);
-          date = getFormattedDate(buyTransaction.timeStamp);
-          listBuyTransactionsToAdd.push({ hash: buyTransaction.hash, amountTransaction: amountTransaction.toString(), cryptoBuy: cryptoBuy, quantityBuy: quantityBuy.toString(), cryptoSell: cryptoSell, quantitySell: quantitySell.toString(), date: date })
-          //showTransactionDetails("ACHAT 6 LOGS", logs[0].transactionHash, amountTransaction, cryptoBuy, quantityBuy, cryptoSell, quantitySell, date);
-
-        } else {
-          console.log("|getListTransactionToAdd| Achat, logs length != 5 & 6");
-        }
-      } else {
-        console.log("|getListTransactionToAdd| Achat, logs :" + buyTransaction.hash + "is null")
+    const transactions = data.result;
+    for (const transaction of transactions) {
+      listTransferLogs = [];
+      if (transaction.timeStamp > timestampMax) {
+        timestampMax = transaction.timeStamp;
       }
-    } else {
-      console.log("|getListTransactionToAdd| Achat, buyTransactionReceipt of: " + buyTransaction.hash + "is null")
-    }
-  }
+      if (transaction.blockNumber > blockNumberMax) {
+        blockNumberMax = transaction.blockNumber;
+      }
 
-  for (sellTransaction of listSellTransactions) {
-    let sellTransactionReceipt = getTransactionReceipt(sellTransaction.hash);
-    if (sellTransactionReceipt) {
-      logs = sellTransactionReceipt.logs;
-      if (logs) {
-        if (logs.length == 5) {
-          quantityBuy = hexToDecimal(logs[1].data) / 10e17;
-          amountTransaction = ethPrice * (quantityBuy + (sellTransaction.gasUsed * (sellTransaction.gasPrice / 10e17)));
-          cryptoBuy = "Ethereum";
-          cryptoSell = getCryptpoName(logs[0].address);
-          if (cryptoSell == "Tether USDt") {
-            quantitySell = hexToDecimal(logs[0].data) / 10e5;
-          } else {
-            quantitySell = hexToDecimal(logs[0].data) / 10e17;
+      if (listMethodIdSwap.includes(transaction.methodId) && transaction.timeStamp > lastTimeStampTransaction && transaction.txreceipt_status == 1) {
+        transactionReceipt = getTransactionReceipt(transaction.hash);
+        logs = transactionReceipt.logs;
+        date = getFormattedDate(transaction.timeStamp);
+        gasFee = transaction.gasUsed * (transaction.gasPrice / 10e17)
+        for (const log of logs) {
+          if (log.topics[0] == transferTopic) {
+            listTransferLogs.push(log);
+            console.log(log)
           }
-
-          date = getFormattedDate(sellTransaction.timeStamp);
-
-          listSellTransactionsToAdd.push({ hash: sellTransaction.hash, amountTransaction: amountTransaction.toString(), cryptoBuy: cryptoBuy, quantityBuy: quantityBuy.toString(), cryptoSell: cryptoSell, quantitySell: quantitySell.toString(), date: date })
-          //showTransactionDetails("VENTE 5 LOGS", logs[0].transactionHash, amountTransaction, cryptoBuy, quantityBuy, cryptoSell, quantitySell, date);
-        } else if (logs.length == 6) {
-          quantitySell =
-            hexToDecimal(logs[0].data) / 10e17 +
-            hexToDecimal(logs[1].data) / 10e17;
-          quantityBuy = hexToDecimal(logs[2].data) / 10e17;
-          amountTransaction = ethPrice * (quantityBuy + (sellTransaction.gasUsed * (sellTransaction.gasPrice / 10e17)));
-          cryptoBuy = "Ethereum";
-          cryptoSell = getCryptpoName(logs[0].address);
-          date = getFormattedDate(sellTransaction.timeStamp);
-          listSellTransactionsToAdd.push({ hash: sellTransaction.hash, amountTransaction: amountTransaction.toString(), cryptoBuy: cryptoBuy, quantityBuy: quantityBuy.toString(), cryptoSell: cryptoSell, quantitySell: quantitySell.toString(), date: date })
-          //showTransactionDetails("VENTE 6 LOGS", logs[0].transactionHash, amountTransaction, cryptoBuy, quantityBuy, cryptoSell, quantitySell, date);
-
-        } else {
-          console.log("|getListTransactionToAdd| Vente, logs length != 5 & 6");
         }
-      } else {
-        console.log("|getListTransactionToAdd| Vente, logs :" + sellTransaction.hash + "is null")
+        if (listTransferLogs.length == 2) {
+          //console.log("Swap classique");
+          cryptoSell = getCryptpoName(listTransferLogs[0].address);
+          quantitySell = hexToDecimal(listTransferLogs[0].data) / 10e17;
+          cryptoBuy = getCryptpoName(listTransferLogs[1].address);
+          quantityBuy = hexToDecimal(listTransferLogs[1].data) / 10e17;
+          if (cryptoSell == "Ethereum") {
+            amountTransaction = (quantitySell + gasFee) * getCryptoPriceWithName(cryptoSell);
+          }
+          else if (cryptoBuy == "Ethereum") {
+            amountTransaction = (quantityBuy + gasFee) * getCryptoPriceWithName(cryptoBuy);
+          }
+          else {
+            console.log("Pas d'eth dans la transaction")
+          }
+          if (cryptoSell && quantitySell && cryptoBuy && quantityBuy && transaction.hash && amountTransaction && date) {
+            listTransactionsToAdd.push({ hash: transaction.hash, amountTransaction: amountTransaction.toString(), cryptoBuy: cryptoBuy, quantityBuy: quantityBuy.toString(), cryptoSell: cryptoSell, quantitySell: quantitySell.toString(), date: date })
+          }
+          else {
+            console.log("Une des valeurs de la transaction est undefine")
+          }
+          showTransactionDetails("2 transfer", transaction.hash, amountTransaction, cryptoBuy, quantityBuy, cryptoSell, quantitySell, date);
+        }
+        else if (listTransferLogs.length > 2) {
+          //console.log("Sa taxe sa race fait gaffe mon canard");
+          cryptoSell = getCryptpoName(listTransferLogs[0].address)
+          cryptoBuy = getCryptpoName(listTransferLogs[listTransferLogs.length - 1].address)
+          if (cryptoSell == "Ethereum" || cryptoBuy == "Ethereum") {
+            if (cryptoBuy == "Ethereum") {
+              quantitySell = (hexToDecimal(listTransferLogs[0].data) / 10e17) + (hexToDecimal(listTransferLogs[1].data) / 10e17);
+              quantityBuy = hexToDecimal(listTransferLogs[listTransferLogs.length - 1].data) / 10e17;
+              amountTransaction = (quantityBuy + gasFee) * getCryptoPriceWithName(cryptoBuy);
+            } else {
+              quantitySell = hexToDecimal(listTransferLogs[0].data) / 10e17;
+              quantityBuy = hexToDecimal(listTransferLogs[listTransferLogs.length - 1].data) / 10e17;
+              amountTransaction = (quantitySell + gasFee) * getCryptoPriceWithName(cryptoSell);
+            }
+            listTransactionsToAdd.push({ hash: transaction.hash, amountTransaction: amountTransaction.toString(), cryptoBuy: cryptoBuy, quantityBuy: quantityBuy.toString(), cryptoSell: cryptoSell, quantitySell: quantitySell.toString(), date: date })
+          }
+          showTransactionDetails("taxe", transaction.hash, amountTransaction, cryptoBuy, quantityBuy, cryptoSell, quantitySell, date);
+        }
+        else {
+          console.log("1 seul transfer c'est chelou de zinzin");
+        }
       }
-    } else {
-      console.log("|getListTransactionToAdd| Vente, sellTransactionReceipt of: " + sellTransaction.hash + "is null")
+
     }
-  }
-  return {
-    listBuyTransactionsToAdd: listBuyTransactionsToAdd,
-    listSellTransactionsToAdd: listSellTransactionsToAdd
+    //setLastTimeStampTransaction(timestampMax);
+    return listTransactionsToAdd;
+  } else {
+    console.log("|fetchDataFromEtherscan| API Etherscan message: " + data.message);
+    return null;
   }
 }
 
@@ -356,6 +234,9 @@ function getCryptpoName(address) {
       if (name) {
         mapAddressCryptoGlobalString += `;${address}:${name}`;
         scriptProperties.setProperty('mapAddressCryptoGlobal', mapAddressCryptoGlobalString);
+        if (name == "WETH") {
+          name = "Ethereum";
+        }
         return name;
       } else {
         console.log("|getCryptpoName| name is null premier else");
@@ -367,6 +248,9 @@ function getCryptpoName(address) {
   else {
     name = mapAddressCryptoGlobal[address];
     if (name) {
+      if (name == "WETH") {
+        name = "Ethereum";
+      }
       return name;
     } else {
       console.log("|getCryptpoName| name is null dernier else");
@@ -375,28 +259,77 @@ function getCryptpoName(address) {
   return null;
 }
 
-function getCurrentEthPrice() {
-  const urlQuotes = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id=1027";
+function getCryptoPriceWithName(name) {
+  const urlSymbols = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/map";
+  const urlQuotes = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest";
+  let cryptoId;
   let options = {
     method: "get",
     headers: {
-      "X-CMC_PRO_API_KEY": "9c8a01c2-519b-4173-8c5b-4842461e61e4",
+      "X-CMC_PRO_API_KEY": "ca39beee-0d9a-4bc9-8847-a60f190fc9ad",
     },
     muteHttpExceptions: true // Prevents throwing an exception for non-2xx responses
   };
-  let quoteResponse = UrlFetchApp.fetch(urlQuotes, options);
+  let cryptoPrice;
+  const scriptProperties = PropertiesService.getScriptProperties();
+  let mapIdCryptoGlobalString = scriptProperties.getProperty('mapIdCryptoGlobal');
+  const mapIdCryptoGlobal = {};
+  const keyValuePairs = mapIdCryptoGlobalString.split(";");
+  keyValuePairs.forEach(keyValuePair => {
+    const [key, value] = keyValuePair.split(":");
+    if (key) {
+      mapIdCryptoGlobal[key] = value;
+    }
+  });
+
+  if (!(name in mapIdCryptoGlobal)) {
+    let response = UrlFetchApp.fetch(urlSymbols, options);
+    if (response.getResponseCode() === 200) {
+      let jsonData = response.getContentText();
+      const json = JSON.parse(jsonData);
+      const data = json.data;
+      const cryptoData = data.find(item => item.name === name);
+
+      if (!cryptoData) {
+        console.log(`Cryptomonnaie '${name}' introuvable.`);
+      }
+
+      cryptoId = cryptoData.id;
+      mapIdCryptoGlobalString += `;${name}:${cryptoId}`;
+      scriptProperties.setProperty('mapIdCryptoGlobal', mapIdCryptoGlobalString);
+    } else if (response.getResponseCode() === 429) {
+      console.log("|getCryptoPriceWithName| nb limite de requete atteint")
+      return null;
+    } else {
+      console.log("|getCryptoPriceWithName| Erreur chelou pour l'appel")
+      return null;
+    }
+  }
+  else {
+    cryptoId = mapIdCryptoGlobal[name];
+    if (!cryptoId) {
+      return null;
+    }
+  }
+
+  let quoteResponse = UrlFetchApp.fetch(`${urlQuotes}?id=${cryptoId}`, options);
+
 
   if (quoteResponse.getResponseCode() === 200) {
     let quoteJsonData = quoteResponse.getContentText();
     const quoteJson = JSON.parse(quoteJsonData);
-    const cryptoPrice = quoteJson.data["1027"].quote.USD.price;
-    return cryptoPrice;
-  }
-  else {
-    console.log("|getCurrentEthPrice| Fail request cmc api,quoteResponse.getResponseCode(): " + quoteResponse.getResponseCode())
+
+    cryptoPrice = quoteJson.data[cryptoId].quote.USD.price;
+    if (!cryptoPrice) {
+      return null;
+    }
+  } else if (quoteResponse.getResponseCode() === 429) {
+    console.log("|getCryptoPriceWithName| nb limite de requete atteint")
+  } else {
+    console.log("|getCryptoPriceWithName| Erreur chelou pour l'appel")
     return null;
   }
-
+  return cryptoPrice;
 }
 
 function getAllCryptoNameInGS() {
@@ -439,7 +372,7 @@ function getAllCryptoNameInGS() {
 }
 
 function showTransactionDetails(typeTransaction, transactionHash, amountTransaction, cryptoBuy, quantityBuy, cryptoSell, quantitySell, date) {
-  console.log("VtypeTransaction: " + typeTransaction);
+  console.log("typeTransaction: " + typeTransaction);
   console.log("hash transaction: " + transactionHash);
   console.log("amountTransaction: " + amountTransaction);
   console.log("cryptoBuy: " + cryptoBuy);
