@@ -200,12 +200,7 @@
           let selectedAmount = amountInput.value;
           let selectedQuantityBuy = quantityInputBuy.value;
           let selectedQuantitySell = quantityInputSell.value;
-          let buy = true;
-          let sell = false;
-          
-          google.script.run.addNewTransaction(selectedAmount, selectedOptionBuy, selectedQuantityBuy, selectedDate, buy);
-          google.script.run.addNewTransaction(selectedAmount, selectedOptionSell, selectedQuantitySell, selectedDate, sell);
-          google.script.run.addNewChronologicalTransactionHistoric(selectedAmount, selectedOptionBuy, selectedQuantityBuy, selectedOptionSell, selectedQuantitySell, selectedDate, sell);
+          google.script.run.transaction(selectedAmount, selectedOptionBuy, selectedQuantityBuy, selectedOptionSell, selectedQuantitySell, selectedDate);
 
           google.script.host.close();
         }
