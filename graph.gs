@@ -47,7 +47,7 @@ function graph(){
   createPieChart(graphSheet, dataDiagramDistribution);
   
   let charts = graphSheet.getCharts();
-  downloadPdfV2(charts[0], charts[1], allData.review)
+  downloadPdf(charts[0], charts[1], allData.review)
 
   deleteSheet("Graphiques");
 }
