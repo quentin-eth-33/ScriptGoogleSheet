@@ -1,0 +1,147 @@
+<html>
+
+<head>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      color: #333;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    .section {
+      margin: 20px auto;
+      max-width: 800px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #0077cc;
+      margin-bottom: 20px;
+    }
+
+    .chart {
+      width: 100%;
+      height: 400px;
+    }
+
+    #bilan {
+      background-color: #e8e8e8;
+      border-radius: 5px;
+      padding: 15px;
+    }
+
+    #bilan p {
+      margin: 10px 0;
+      font-size: 16px;
+      color: #666;
+    }
+
+    .bilan-title {
+      font-weight: bold;
+    }
+
+    /* Ajout de styles pour les boutons et autres éléments interactifs */
+    .btn {
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .btn:hover {
+      background-color: #005fa3;
+    }
+  </style>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.3/jspdf.debug.js"></script>
+  <script type="text/javascript">
+    google.charts.load("current", { packages: ["corechart"] });
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+      // Courbe Evolution Totale ----------------------------------------------------------
+      let dataEvolCourbe = google.visualization.arrayToDataTable(allData.evolutionCourbe);
+      let optionsEvolCourbe = {
+        title: 'Evolution Performance Totale',
+        curveType: 'function',
+        legend: { position: 'bottom' },
+        hAxis: {
+          title: 'Date' // Titre de l'axe des abscisses
+        },
+        vAxis: {
+          title: 'Evolution en %' // Titre de l'axe des ordonnées
+        },
+        //backgroundColor: 'whitesmoke'
+      };
+
+      let chartEvolCourbe = new google.visualization.LineChart(document.getElementById('curve_chart')); 
+      chartEvolCourbe.draw(dataEvolCourbe, optionsEvolCourbe);
+      // -----------------------------------------------------------------------------------
+
+      // Diagramme Répartition Crypto ------------------------------------------------------
+      let dataDistribuDiagram = google.visualization.arrayToDataTable(allData.distributionDiagram);
+
+      let optionsDistribuDiagram = {
+        title: 'Répartition Crypto',
+        pieHole: 0.4,
+      };
+
+      let chartDistribuDiagram = new google.visualization.PieChart(document.getElementById('donutchart'));
+      chartDistribuDiagram.draw(dataDistribuDiagram, optionsDistribuDiagram);
+      // -----------------------------------------------------------------------------------
+      
+      // Section Bilan (new crypto...)------------------------------------------------------
+      // Modifier la section du bilan avec les balises <span>
+      document.getElementById("nbTransactions").textContent = allData.review.nbTransactionMonth;
+      document.getElementById("totalAmount").textContent = allData.review.totalAmount;
+      document.getElementById("newCrypto").textContent = allData.review.newCrypto;
+      document.getElementById("deleteCrypto").textContent = allData.review.deleteCrypto;
+      document.getElementById("amountNewCashIn").textContent = allData.review.amountNewCashIn;
+      document.getElementById("sellNFT").textContent = allData.review.sellNFT;
+      document.getElementById("buyNFT").textContent = allData.review.buyNFT;
+      // -----------------------------------------------------------------------------------
+      // google.script.run.downloadPdf(chartEvolCourbe.getImageURI(), chartDistribuDiagram.getImageURI(), allData.review);
+      
+    }
+  </script>
+</head>
+
+<body>
+  <div class="section">
+    <h1>Performance Evolution</h1>
+    <div class="chart" id="curve_chart"></div>
+  </div>
+
+  <div class="section">
+    <h1>Répartition Crypto</h1>
+    <div class="chart" id="donutchart"></div>
+  </div>
+
+  <div class="section">
+    <h1>Bilan</h1>
+    <div id="bilan">
+      <p><span class="bilan-title">Nombre de Transactions:</span> <span id="nbTransactions"></span></p>
+      <p><span class="bilan-title">Montant Total des Transactions:</span> <span id="totalAmount"></span>$</p>
+      <p><span class="bilan-title">Nouvelle Crypto:</span> <span id="newCrypto"></span></p>
+      <p><span class="bilan-title">Crypto Supprimé:</span> <span id="deleteCrypto"></span></p>
+      <p><span class="bilan-title">Montant Nouvel Apport Monétaire:</span> <span id="amountNewCashIn"></span>$</p>
+      <p><span class="bilan-title">NFT Achetée:</span> <span id="buyNFT"></span></p>
+      <p><span class="bilan-title">NFT Vendu:</span> <span id="sellNFT"></span></p>
+    </div>
+  </div>
+
+  <!-- Bouton de téléchargement PDF -->
+  <!-- <button class="btn">Télécharger PDF</button> -->
+
+</body>
+
+</html>
