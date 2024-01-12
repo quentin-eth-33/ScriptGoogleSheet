@@ -200,7 +200,7 @@
           let selectedAmount = amountInput.value;
           let selectedQuantityBuy = quantityInputBuy.value;
           let selectedQuantitySell = quantityInputSell.value;
-          google.script.run.transaction(selectedAmount, selectedOptionBuy, selectedQuantityBuy, selectedOptionSell, selectedQuantitySell, selectedDate);
+          google.script.run.transactionCrypto(selectedAmount, selectedOptionBuy, selectedQuantityBuy, selectedOptionSell, selectedQuantitySell, selectedDate);
 
           google.script.host.close();
         }
