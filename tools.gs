@@ -1,24 +1,37 @@
-function shiftDrawing(action, rowShift){
+function deleteSheet(sheetName) {
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = spreadsheet.getSheetByName(sheetName);
+
+  if (sheet != null) {
+    spreadsheet.deleteSheet(sheet);
+  } else {
+    console.log("La feuille n'a pas été trouvée.");
+  }
+}
+
+
+function shiftDrawing(action, rowShift) {
   const drawings = SHEET.getDrawings();
   let indexDraw;
-  for(let i=0; i<drawings.length; i++){
-    if(drawings[i].getOnAction() == action){
+  for (let i = 0; i < drawings.length; i++) {
+    if (drawings[i].getOnAction() == action) {
       indexDraw = i;
       break;
     }
   }
-  if(indexDraw){
+  if (indexDraw) {
     let row = drawings[indexDraw].getContainerInfo().getAnchorRow();
     let column = drawings[indexDraw].getContainerInfo().getAnchorColumn();
-    console.log("row: "+row)
-    console.log("column: "+column)
-    drawings[indexDraw].setPosition(row+rowShift, column, 0, 0);
+    console.log("row: " + row)
+    console.log("column: " + column)
+    drawings[indexDraw].setPosition(row + rowShift, column, 0, 0);
 
 
-  } else{
+  } else {
     console.log("|shiftDrawing| Dessin pas trouvé");
   }
 }
+
 
 // Renvoie l'index de la ligne/colonne de la valeur recherchée. La recherche s'effectue sur toute la feuille.
 function findCellWithValueAllSheet(searchValue) {
@@ -32,13 +45,31 @@ function findCellWithValueAllSheet(searchValue) {
     };
     return results;
   } else {
-    console.log("La valeur n'a pas été trouvée sur la feuille.");
+    console.log("|findCellWithValueAllSheet| La valeur n'a pas été trouvée sur la feuille.");
     return null;
   }
 }
 
-function findCellsWithValueAndBackgroundAllSheet(searchValue, background) {
-  let textFinder = SHEET.createTextFinder(searchValue);
+function findCellWithValueAllSheetName(searchValue, sheetName) {
+  const sheetNameTemp = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  let find = sheetNameTemp.createTextFinder(searchValue).findNext();
+  if (find) {
+    let row = find.getRow();
+    let column = find.getColumn();
+    let results = {
+      row: row,
+      column: column
+    };
+    return results;
+  } else {
+    console.log("|findCellWithValueAllSheetName| La valeur n'a pas été trouvée sur la feuille.");
+    return null;
+  }
+}
+
+function findCellsWithValueAndBackgroundAllSheet(sheetName, searchValue, background) {
+  const SHEET_TH = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  let textFinder = SHEET_TH.createTextFinder(searchValue);
   let results = [];
 
   while (true) {
@@ -47,14 +78,14 @@ function findCellsWithValueAndBackgroundAllSheet(searchValue, background) {
 
     let row = find.getRow();
     let column = find.getColumn();
-    let cell = SHEET.getRange(row, column);
+    let cell = SHEET_TH.getRange(row, column);
 
     if (cell.getBackground() === background) {
       results.push({ row: row, column: column });
     }
   }
 
-  if (results.length == 1) {
+  if (results.length > 0) {
     return results[0];
   } else {
     console.log("|findCellsWithValueAndBackgroundAllSheet| Erreur, results.length: " + results.length)
@@ -62,13 +93,18 @@ function findCellsWithValueAndBackgroundAllSheet(searchValue, background) {
   }
 }
 
+// Fonction de comparaison pour le tri décroissant en fonction de la valeur "value"
+function descendingComparisonFunction(a, b) {
+  return b.value - a.value;
+}
+
 
 function getAllCrypto(columnCR, rowFirstCrypto) {
-  let sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   let choices = [];
-  const values = sheet.getRange(rowFirstCrypto, columnCR, sheet.getLastRow(), 1).getValues();
+  console.log("|getAllCrypto| rowFirstCrypto: "+rowFirstCrypto)
+  const values = SHEET.getRange(rowFirstCrypto, columnCR, SHEET.getLastRow(), 1).getValues();
   for (let j = 0; j < values.length; j++) {
-    if (values[j][0] == "Total Investi:" || values[j][0] == "") {
+    if (values[j][0] == CR.VALUE_AFTER_LAST_CRYPTO || values[j][0] == "") {
       break;
     }
     else {
@@ -91,6 +127,22 @@ function getRowIndexInColumnWithValue(searchValue, indexColumn) {
   console.log("|getRowIndexInColumnWithValue| Aucune ligne ne contient la valeur: " + searchValue + " recherchée sur la colonne: " + indexColumn);
   return null;
 }
+
+// Renvoie l'index de la ligne contenant la valeur "searchValue" sur la colonne "indexColumn"
+function getRowIndexInColumnWithValueWithSheet(sheetName, searchValue, indexColumn) {
+  const SHEET_TH = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  var columnRange = SHEET_TH.getRange(1, indexColumn, SHEET_TH.getLastRow(), 1);
+  var columnValue = columnRange.getValues();
+  for (var i = 0; i < columnValue.length; i++) {
+    if (columnValue[i][0] === searchValue) {
+      var indexRow = i + 1;
+      return indexRow;
+    }
+  }
+  console.log("|getRowIndexInColumnWithValueWithSheet| Aucune ligne ne contient la valeur: " + searchValue + " recherchée sur la colonne: " + indexColumn);
+  return null;
+}
+
 
 // Renvoie la lettre de la colonne à partir de son index, ex: si l'index est 5 elle renvoie "E"
 function getColumnHeader(columnIndex) {
@@ -144,6 +196,11 @@ function getFontColorReference(indexRow, indexColumn) {
   console.log("Couleur de la police de la cellule: " + fontColor);
 }
 
+function color(){
+  getFontColorReference(1,1);
+  getBackgroundColorReference(1,1)
+}
+
 // Renvoie l'index de la dernière colonne de la cellule fusionnée passé en paramètre
 function getMergedCellColumnsEnd(rowIndex, columnIndex) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
@@ -161,56 +218,58 @@ function getMergedCellColumnsEnd(rowIndex, columnIndex) {
   return endColumn;
 }
 
-// Retourne le format adapté au nombre passé en paramètre
 function getCellFormatNumber(averageBuyingPrice) {
+  // Convertir averageBuyingPrice en nombre si ce n'est pas déjà un nombre
+  var price = (typeof averageBuyingPrice === 'string') ? parseFloat(averageBuyingPrice) : averageBuyingPrice;
+
   var formatNumber = '0';
-  if (averageBuyingPrice < 30 && averageBuyingPrice > 20) {
+
+  // Vérifie si price est un entier
+  if (Number.isInteger(price)) {
+    formatNumber = '0';
+  } else if (price < 30 && price > 20) {
     formatNumber = '0.0';
-  }
-  else if (averageBuyingPrice <= 20 && averageBuyingPrice > 1) {
+  } else if (price <= 20 && price > 1) {
     formatNumber = '0.00';
-  }
-  else if (averageBuyingPrice <= 1 && averageBuyingPrice > 0.09) {
+  } else if (price <= 1 && price > 0.09) {
     formatNumber = '0.000';
-  }
-  else if (averageBuyingPrice <= 0.09 && averageBuyingPrice > 0.009) {
+  } else if (price <= 0.09 && price > 0.009) {
     formatNumber = '0.0000';
-  }
-  else if (averageBuyingPrice <= 0.009 && averageBuyingPrice > 0.0009) {
+  } else if (price <= 0.009 && price > 0.0009) {
     formatNumber = '0.00000';
-  }
-  else if (averageBuyingPrice <= 0.0009 && averageBuyingPrice > 0.00009) {
-    formatNumber = '0.000000'
-  }
-  else if (averageBuyingPrice <= 0.00009 && averageBuyingPrice > 0.000009) {
+  } else if (price <= 0.0009 && price > 0.00009) {
+    formatNumber = '0.000000';
+  } else if (price <= 0.00009 && price > 0.000009) {
     formatNumber = '0.0000000';
   }
 
   return formatNumber;
 }
 
-// Retourne le format adapté au prix passé en paramètre
+
+
 function getCellFormatNumberDollars(averageBuyingPrice) {
-  var formatNumber = '0$';
-  if (averageBuyingPrice < 30 && averageBuyingPrice > 20) {
+  // Convertir averageBuyingPrice en nombre si ce n'est pas déjà un nombre
+  var price = (typeof averageBuyingPrice === 'string') ? parseFloat(averageBuyingPrice) : averageBuyingPrice;
+
+  var formatNumber ='0$';
+
+  // Vérifie si price est un entier
+  if (Number.isInteger(price)) {
+    formatNumber = '0$';
+  } else if (price < 30 && price > 20) {
     formatNumber = '0.0$';
-  }
-  else if (averageBuyingPrice <= 20 && averageBuyingPrice > 1) {
+  } else if (price <= 20 && price > 1) {
     formatNumber = '0.00$';
-  }
-  else if (averageBuyingPrice <= 1 && averageBuyingPrice > 0.09) {
+  } else if (price <= 1 && price > 0.09) {
     formatNumber = '0.000$';
-  }
-  else if (averageBuyingPrice <= 0.09 && averageBuyingPrice > 0.009) {
+  } else if (price <= 0.09 && price > 0.009) {
     formatNumber = '0.0000$';
-  }
-  else if (averageBuyingPrice <= 0.009 && averageBuyingPrice > 0.0009) {
+  } else if (price <= 0.009 && price > 0.0009) {
     formatNumber = '0.00000$';
-  }
-  else if (averageBuyingPrice <= 0.0009 && averageBuyingPrice > 0.00009) {
-    formatNumber = '0.000000$'
-  }
-  else if (averageBuyingPrice <= 0.00009 && averageBuyingPrice > 0.000009) {
+  } else if (price <= 0.0009 && price > 0.00009) {
+    formatNumber = '0.000000$';
+  } else if (price <= 0.00009 && price > 0.000009) {
     formatNumber = '0.0000000$';
   }
 
@@ -254,7 +313,7 @@ function getCellDateFormat(date) {
 }
 
 function refreshEurosPrice() {
-  //let ui = SpreadsheetApp.getUi();
+  let ui = SpreadsheetApp.getUi();
   const scriptProperties = PropertiesService.getScriptProperties();
   let mapIdCryptoGlobalString = scriptProperties.getProperty('mapIdCryptoGlobal');
 
@@ -271,42 +330,90 @@ function refreshEurosPrice() {
 
   if (historicalDeposit) {
     let columnHistoricalDeposit = historicalDeposit.column;
-    console.log("L'index de la columnHistoricalDeposit est : " + columnHistoricalDeposit);
-
-    let rowEurosHistoricalDeposit = getRowIndexInColumnWithValue("Euros:", columnHistoricalDeposit)
+    let rowEurosHistoricalDeposit = getRowIndexInColumnWithValue(HTI.VALUE_ROW_EUROS, columnHistoricalDeposit)
 
     if (rowEurosHistoricalDeposit) {
-      console.log("L'index de la rowEurosHistoricalDeposit est : " + rowEurosHistoricalDeposit);
-      const urlGetEurosPrice = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id=20641";
-      const apiKeyList = getApiKeyCmcList();
-      let indexTabApiKey = 0;
-
-      let options = {
-        method: "get",
-        headers: {
-          "X-CMC_PRO_API_KEY": apiKeyList[indexTabApiKey],
-        },
-        muteHttpExceptions: true // Prevents throwing an exception for non-2xx responses
-      };
-      // 20641
-
-      let quoteResponse = UrlFetchApp.fetch(urlGetEurosPrice, options);
-      let quoteJsonData = quoteResponse.getContentText();
-
-      if (quoteResponse.getResponseCode() === 200) {
-        const quoteJson = JSON.parse(quoteJsonData);
-        cryptoPrice = quoteJson.data["20641"].quote.USD.price;
+      let eurosPrice = getEurosToUsdPrice();
+      if (eurosPrice) {
         let cell = sheet.getRange(rowEurosHistoricalDeposit, columnHistoricalDeposit + 1);
         cell.setNumberFormat("0.00$");
-        cell.setValue(cryptoPrice);
+        cell.setValue(eurosPrice);
       }
-
+      else{
+        console.log("|refreshEurosPrice| getEurosToUsdPrice fail");
+      }
     } else {
       console.log("La valeur Bitcoin n'a pas été trouvée sur la colonne crypto review.");
-      //ui.alert('Erreur', "La valeur Bitcoin n'a pas été trouvée sur la colonne crypto review.", ui.ButtonSet.OK);
+      ui.alert('Erreur', "La valeur Bitcoin n'a pas été trouvée sur la colonne crypto review.", ui.ButtonSet.OK);
     }
   } else {
     console.log("La valeur Bilan Crypto n'a pas été trouvée sur la feuille.");
-    //ui.alert('Erreur', "La valeur Bilan Crypto n'a pas été trouvée sur la feuille.", ui.ButtonSet.OK);
+    ui.alert('Erreur', "La valeur Bilan Crypto n'a pas été trouvée sur la feuille.", ui.ButtonSet.OK);
   }
 }
+
+
+function getEurosToUsdPrice() {
+  let ui = SpreadsheetApp.getUi();
+  const scriptProperties = PropertiesService.getScriptProperties();
+  let mapIdCryptoGlobalString = scriptProperties.getProperty('mapIdCryptoGlobal');
+
+  // Convertir la chaîne en map
+  const mapIdCryptoGlobal = {};
+  const keyValuePairs = mapIdCryptoGlobalString.split(";");
+  keyValuePairs.forEach(keyValuePair => {
+    const [key, value] = keyValuePair.split(":");
+    mapIdCryptoGlobal[key] = value;
+  });
+
+  const urlGetEurosPrice = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id=20641";
+  const apiKeyList = getApiKeyCmcList();
+  let indexTabApiKey = 0;
+
+  let options = {
+    method: "get",
+    headers: {
+      "X-CMC_PRO_API_KEY": apiKeyList[indexTabApiKey],
+    },
+    muteHttpExceptions: true 
+  };
+  // 20641
+
+  let quoteResponse = UrlFetchApp.fetch(urlGetEurosPrice, options);
+  let quoteJsonData = quoteResponse.getContentText();
+
+  if (quoteResponse.getResponseCode() === 200) {
+    const quoteJson = JSON.parse(quoteJsonData);
+    let cryptoPrice = quoteJson.data["20641"].quote.USD.price;
+    return cryptoPrice;
+  }
+  return null;
+}
+
+function getCryptoPriceWithID(idCrypto) {
+
+
+  const urlGetEurosPrice = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id="+idCrypto
+  const apiKeyList = getApiKeyCmcList();
+  let indexTabApiKey = 0;
+
+  let options = {
+    method: "get",
+    headers: {
+      "X-CMC_PRO_API_KEY": apiKeyList[indexTabApiKey],
+    },
+    muteHttpExceptions: true 
+  };
+
+  let quoteResponse = UrlFetchApp.fetch(urlGetEurosPrice, options);
+  let quoteJsonData = quoteResponse.getContentText();
+
+  if (quoteResponse.getResponseCode() === 200) {
+    const quoteJson = JSON.parse(quoteJsonData);
+    let cryptoPrice = quoteJson.data[idCrypto].quote.USD.price;
+    return cryptoPrice;
+  }
+  return null;
+}
+
+
