@@ -174,7 +174,7 @@ function onOpen() {
     { name: 'Add Cash In', functionName: 'showFormAddNewCashIn' },
     { name: 'Add New NFT Transaction', functionName: 'showFormAddNewTransactionNFT' },
     { name: 'Maj All Crypto Data', functionName: 'majDataAllCrypto' },
-    { name: 'See Review', functionName: 'main' },
+    { name: 'See Review', functionName: 'showReview' },
   ];
   spreadsheet.addMenu('Cryptos Function', menuItems);
 }
